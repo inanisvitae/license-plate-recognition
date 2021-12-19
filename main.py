@@ -10,7 +10,7 @@ from preprocess import prepare_training_data, preprocess_image
 def main():
     [train_labels, train_input] = prepare_training_data()
     knnModel = KnnModel(train_labels, train_input)
-    original_image = cv2.imread('LicensePlatesImages/polen34.jpg')
+    original_image = cv2.imread('LicensePlatesImages/1.jpg')
     if original_image is None:
         print('\nError: image is not available \n')
         return
