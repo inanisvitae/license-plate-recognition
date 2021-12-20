@@ -14,5 +14,7 @@ class KnnModel:
         # https://medium.com/@sudhirjain01dec/optical-character-recognizer-using-knn-and-opencv-part2-57637649079c
         knn_model.train(np.array(train_input).astype('float32'), cv2.ml.ROW_SAMPLE,
                         np.array(train_labels).astype('float32'))
-        self.knnModel = knn_model
+        self.knn_model = knn_model
 
+    def classify(self, input_image):
+        return self.knn_model.findNearest(input_image, k=1)

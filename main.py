@@ -10,13 +10,14 @@ from recognize_characters import recognize_characters
 
 def main():
     [train_labels, train_input] = prepare_training_data()
-    knnModel = KnnModel(train_labels, train_input)
+    knn_model = KnnModel(train_labels, train_input)
     original_image = cv2.imread('LicensePlatesImages/1.jpeg')
     if original_image is None:
         print('\nError: image is not available \n')
         return
 
-    recognize_characters(original_image)
+    characters_result = recognize_characters(knn_model, original_image)
+    print('Recognized plate from image = ' + characters_result.upper())
 
 
 # Press the green button in the gutter to run the script.

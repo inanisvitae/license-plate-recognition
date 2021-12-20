@@ -6,20 +6,31 @@ from constants import *
 from preprocess import preprocess_image
 
 
-def recognize_characters(original_image):
+def recognize_characters(knn_model, original_image):
     gray_image, thresh_image = preprocess_image(original_image)
     possible_areas = find_area_with_chars(thresh_image)
 
     height, width = gray_image.shape
     image_board = np.zeros((height, width, 3), np.uint8)
     contours = []
+    str_lst = []
+    # Rearange characters with x, so license will be read from left to right
+    possible_areas.sort(key=lambda item: item.x)
     for area in possible_areas:
         contours.append(area.contour)
         cv2.drawContours(image_board, contours, -1, (255.0, 255.0, 255.0))
         cv2.imshow('a', image_board)
         cv2.waitKey()
-
-    return []
+        cv2.rectangle(image_board, (area.x, area.y), (area.x + area.width, area.y + area.height), (0, 0, 255), 2)
+        cv2.waitKey()
+        potential_char_image = thresh_image[area.y:area.y+area.height, area.x:area.x+area.width]
+        resized_potential_char_image = cv2.resize(potential_char_image, (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT))
+        resized_potential_char_image = resized_potential_char_image.reshape((1, RESIZED_IMAGE_AREA))
+        resized_potential_char_image = np.float32(resized_potential_char_image)
+        retval, results, resp, dists = knn_model.classify(resized_potential_char_image)
+        print(chr(int(results[0][0])))
+        str_lst.append(chr(int(results[0][0])))
+    return ''.join(str_lst)
 
 
 def find_area_with_chars(thresh_image):
@@ -33,3 +44,5 @@ def find_area_with_chars(thresh_image):
                 and MIN_ASPECT_RATIO < area.aspect_ratio < MAX_ASPECT_RATIO:
             possible_areas.append(area)
     return possible_areas
+
+
