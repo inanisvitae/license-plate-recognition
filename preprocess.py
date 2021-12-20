@@ -13,6 +13,14 @@ RESIZED_HEIGHT = 30
 
 
 def preprocess_image(input_image):
+    """
+    Preprocesses input image. Turns image to gray image with cvtColor. Then blurs image with GaussianBlur.
+    Last step is to perform thresholding on the image. The purpose of this function is to preprocess image in such a way
+    that contrasts are bigger compared to the raw image.
+    https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html
+    :param input_image: Any raw image for processing
+    :return: gray_image, thresh_image. These are two images required for training later.
+    """
     # Make image gray to remove colors
     gray_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
     # https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html
@@ -29,6 +37,13 @@ def preprocess_image(input_image):
 
 
 def prepare_training_data():
+    """
+    Prepares training data for knn algorithm in the subsequent steps. There are 180 characters
+    in training_chars.png, so there are 180 rows in train_labels. Characters are represented as
+    ascii code, for example, character 'a' maps to 97, etc. Each row in train_input is flattened
+    image with 20x30 dimensions. They are cropped out from training_chars.png.
+    @:return train_labels, train_input
+    """
     training_image = cv2.imread('training_chars.png')
 
     if training_image is None:

@@ -1,5 +1,3 @@
-import sys
-import numpy as np
 # 4.1.2 of OpenCV
 import cv2
 

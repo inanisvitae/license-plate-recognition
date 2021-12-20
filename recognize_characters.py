@@ -1,12 +1,19 @@
 import cv2
 import numpy as np
-
 from Area import Area
 from constants import *
 from preprocess import preprocess_image
 
 
 def recognize_characters(knn_model, original_image):
+    """
+    Recognizes characters in original image. Preprocesses image, then iterate through all contours found in the image
+    and check against rules, such as minimum area, aspect ratio, etc. Then iterate through all contours found and run
+    knn classification algorithm on it.
+    :param knn_model: Model trained with training set
+    :param original_image: The raw image without preprocessing.
+    :return: a string containing plate characters
+    """
     gray_image, thresh_image = preprocess_image(original_image)
     possible_areas = find_area_with_chars(thresh_image)
 
@@ -14,6 +21,8 @@ def recognize_characters(knn_model, original_image):
     image_board = np.zeros((height, width, 3), np.uint8)
     contours = []
     str_lst = []
+    # TODO: Needs to group images together so that consecutive characters will be recognized together. Also need to
+    #  remove contours that are within another contour. For example, needs to remove small triangle inside character '4'
     # Rearange characters with x, so license will be read from left to right
     possible_areas.sort(key=lambda item: item.x)
     for area in possible_areas:
@@ -25,6 +34,7 @@ def recognize_characters(knn_model, original_image):
         cv2.waitKey()
         potential_char_image = thresh_image[area.y:area.y+area.height, area.x:area.x+area.width]
         resized_potential_char_image = cv2.resize(potential_char_image, (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT))
+        # Needs to reshape again for classification
         resized_potential_char_image = resized_potential_char_image.reshape((1, RESIZED_IMAGE_AREA))
         resized_potential_char_image = np.float32(resized_potential_char_image)
         retval, results, resp, dists = knn_model.classify(resized_potential_char_image)
