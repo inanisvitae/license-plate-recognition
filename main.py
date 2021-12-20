@@ -5,19 +5,18 @@ import cv2
 
 from knn_model import KnnModel
 from preprocess import prepare_training_data, preprocess_image
+from recognize_characters import recognize_characters
 
 
 def main():
     [train_labels, train_input] = prepare_training_data()
     knnModel = KnnModel(train_labels, train_input)
-    original_image = cv2.imread('LicensePlatesImages/1.jpg')
+    original_image = cv2.imread('LicensePlatesImages/1.jpeg')
     if original_image is None:
         print('\nError: image is not available \n')
         return
 
-    gray_image, thresh_image = preprocess_image(original_image)
-    thresh_image_copy = thresh_image.copy()
-    contours, hierarchy = cv2.findContours(thresh_image_copy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    recognize_characters(original_image)
 
 
 # Press the green button in the gutter to run the script.

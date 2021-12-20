@@ -34,7 +34,7 @@ def prepare_training_data():
     if training_image is None:
         print('Image not available\n')
         return
-    gray_image, thresh_image = preprocess_images(training_image)
+    gray_image, thresh_image = preprocess_image(training_image)
     cv2.imshow('Image Thresh', thresh_image)
     cv2.waitKey()
     copy_thresh_image = thresh_image.copy()
