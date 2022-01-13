@@ -60,6 +60,13 @@ def remove_overlapped_characters(possible_areas):
 
 
 def group_list_characters(possible_area, possible_areas):
+    """
+    Checks whether two areas should be grouped together according to some rules. The rules are as follows: Change in area
+    shouldn't be smaller than MAX_CHANGE_IN_AREA,
+    :param possible_area: Area to be grouped
+    :param possible_areas: the list of areas
+    :return:
+    """
     list_of_grouped_area = []
     for pa in possible_areas:
         if possible_area is pa:
@@ -68,11 +75,14 @@ def group_list_characters(possible_area, possible_areas):
         change_in_areas = float(abs(pa.size - possible_area.size) / float(possible_area.size))
         change_in_width = float(abs(pa.width - possible_area.width) / float(possible_area.width))
         change_in_height = float(abs(pa.height - possible_area.height) / float(possible_area.height))
-
+        change_in_y_distance = abs(pa.center_y - possible_area.center_y)
+        average_height = abs(pa.height + possible_area.height) / 2.0
         if (distance_between_areas < (pa.diagonal * MAX_DIAG_SIZE_MULTIPLE_AWAY) and
                 change_in_areas < MAX_CHANGE_IN_AREA and
                 change_in_width < MAX_CHANGE_IN_WIDTH and
-                change_in_height < MAX_CHANGE_IN_HEIGHT):
+                change_in_height < MAX_CHANGE_IN_HEIGHT and
+                # Change in distance in y axis shouldn't be smaller than half of height of the character
+                change_in_y_distance < average_height):
             list_of_grouped_area.append(pa)
     return list_of_grouped_area
 
@@ -96,7 +106,8 @@ def recognize_characters(knn_model, original_image):
     list_of_groups_of_characters = group_characters(possible_areas)
     for list_of_group in list_of_groups_of_characters:
         list_of_group.sort(key=lambda matching_char: matching_char.center_x)
-    for area in list_of_groups_of_characters[0]:
+    list_of_groups_of_characters_tmp = max(list_of_groups_of_characters, key=len)
+    for area in list_of_groups_of_characters_tmp:
         contours.append(area.contour)
         cv2.drawContours(image_board, contours, -1, (255.0, 255.0, 255.0))
         cv2.imshow('a', image_board)
