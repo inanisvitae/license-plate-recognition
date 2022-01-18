@@ -45,6 +45,11 @@ def compute_euclidean_distance_between_areas(first_area, second_area):
 
 
 def remove_overlapped_characters(possible_areas):
+    """
+    Removes the overlapped characters by checking its diagonal length and coordinates of two contours.
+    :param possible_areas: a list of possible contours waiting to be checked
+    :return:
+    """
     list_of_characters_removed = list(possible_areas)
     for pa1 in possible_areas:
         for pa2 in possible_areas:
@@ -77,6 +82,7 @@ def group_list_characters(possible_area, possible_areas):
         change_in_height = float(abs(pa.height - possible_area.height) / float(possible_area.height))
         change_in_y_distance = abs(pa.center_y - possible_area.center_y)
         average_height = abs(pa.height + possible_area.height) / 2.0
+        # Decides if this contour should belong to this specific group
         if (distance_between_areas < (pa.diagonal * MAX_DIAG_SIZE_MULTIPLE_AWAY) and
                 change_in_areas < MAX_CHANGE_IN_AREA and
                 change_in_width < MAX_CHANGE_IN_WIDTH and
@@ -97,6 +103,7 @@ def recognize_characters(knn_model, original_image):
     :return: a string containing plate characters
     """
     gray_image, thresh_image = preprocess_image(original_image)
+    cv2.imshow('a2', gray_image)
     possible_areas = find_area_with_chars(thresh_image)
 
     height, width = gray_image.shape
@@ -104,6 +111,7 @@ def recognize_characters(knn_model, original_image):
     contours = []
     str_lst = []
     list_of_groups_of_characters = group_characters(possible_areas)
+    # Sorts list of groups of characters according to its center_x value
     for list_of_group in list_of_groups_of_characters:
         list_of_group.sort(key=lambda matching_char: matching_char.center_x)
     list_of_groups_of_characters_tmp = max(list_of_groups_of_characters, key=len)
@@ -113,6 +121,7 @@ def recognize_characters(knn_model, original_image):
         cv2.imshow('a', image_board)
         cv2.waitKey()
         cv2.rectangle(image_board, (area.x, area.y), (area.x + area.width, area.y + area.height), (0, 0, 255), 2)
+        # Waits for user to enter a random key to continue
         cv2.waitKey()
         potential_char_image = thresh_image[area.y:area.y + area.height, area.x:area.x + area.width]
         resized_potential_char_image = cv2.resize(potential_char_image, (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT))
@@ -125,6 +134,12 @@ def recognize_characters(knn_model, original_image):
 
 
 def find_area_with_chars(thresh_image):
+    """
+    In this section, preliminary conditions of checking whether a contour is possibly a character is checked. It has to
+    fit the size criteria.
+    :param thresh_image: thresholded image
+    :return: a list of possible contours
+    """
     possible_areas = []
     thresh_image_copy = thresh_image.copy()
     contours, hierarchy = cv2.findContours(thresh_image_copy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)

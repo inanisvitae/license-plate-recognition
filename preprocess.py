@@ -8,8 +8,7 @@ import cv2
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
-RESIZED_WIDTH = 20
-RESIZED_HEIGHT = 30
+from constants import *
 
 
 def preprocess_image(input_image):
@@ -55,7 +54,7 @@ def prepare_training_data():
     copy_thresh_image = thresh_image.copy()
     # https://docs.opencv.org/4.1.2/d4/d73/tutorial_py_contours_begin.html
     contours, hierarchy = cv2.findContours(copy_thresh_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    train_input = np.empty((0, RESIZED_WIDTH * RESIZED_HEIGHT))
+    train_input = np.empty((0, RESIZED_IMAGE_WIDTH * RESIZED_IMAGE_HEIGHT))
 
     labels = []
     valid_chars = [ord('0'), ord('1'), ord('2'), ord('3'), ord('4'), ord('5'), ord('6'), ord('7'), ord('8'), ord('9'),
@@ -66,6 +65,8 @@ def prepare_training_data():
                      ord('k'), ord('l'), ord('m'), ord('n'), ord('o'), ord('p'), ord('q'), ord('r'), ord('s'), ord('t'),
                      ord('u'), ord('v'), ord('w'), ord('x'), ord('y'), ord('z')]
     # keys_pressed = []
+    # The order of keys that should be pressed is stored in keys_pressed.txt for convenience, so user doesn't need to
+    # enter the label of current character everytime when the program is run.
     keys_pressed = np.loadtxt("keys_pressed.txt", np.float32)
     count = 0
     for contour in contours:
@@ -74,7 +75,7 @@ def prepare_training_data():
             [x, y, w, h] = cv2.boundingRect(contour)
             cv2.rectangle(training_image, (x, y), (x + w, y + h), (0, 0, 0), 2)
             individual_area = thresh_image[y:y + h, x:x + w]
-            individual_area_resized = cv2.resize(thresh_image[y:y + h, x:x + w], (RESIZED_WIDTH, RESIZED_HEIGHT))
+            individual_area_resized = cv2.resize(thresh_image[y:y + h, x:x + w], (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT))
             cv2.imshow("individual_area", individual_area)
             cv2.imshow("individual_area_resized", individual_area_resized)
             cv2.imshow("training_numbers.png", training_image)
@@ -83,7 +84,7 @@ def prepare_training_data():
             # keys_pressed.append(key_pressed)
             if key_pressed in valid_chars:
                 labels.append(key_pressed)
-                train_input = np.append(train_input, individual_area_resized.reshape((1, RESIZED_WIDTH * RESIZED_HEIGHT)), 0)
+                train_input = np.append(train_input, individual_area_resized.reshape((1, RESIZED_IMAGE_WIDTH * RESIZED_IMAGE_HEIGHT)), 0)
             count += 1
     train_labels_mat = np.array(labels, np.float32)
     train_labels = train_labels_mat.reshape((train_labels_mat.size, 1))
